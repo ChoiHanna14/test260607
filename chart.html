@@ -346,70 +346,39 @@
             themeToggle.textContent = isDark ? '☀️' : '🌙';
         });
 
-        // Supabase 설정
-        const SUPABASE_URL = 'https://gpaeevgjounqazxecybr.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwYWVldmdqb3VucWF6eGVjeWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3NzcwMDAsImV4cCI6MTczMzMyOTAwMH0.o7xvLXQgKCXg_GLFDHvB7Ygeu7MvPJJB-1Fc1tMSqrI';
-
-        // 데이터 처리 - Supabase에서 가져올 데이터
-        let data = [];
-
-        // Supabase에서 매출 데이터 가져오기
-        async function fetchSalesData() {
-            try {
-                const headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Prefer': 'return=representation'
-                };
-
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/sales?select=*`, { headers });
-                const salesData = await res.json();
-                data = salesData.map(item => ({
-                    date: item.date,
-                    product: item.product,
-                    amount: item.amount
-                }));
-
-                console.log('✅ Supabase에서 매출 데이터 로드 완료');
-                renderCharts();
-            } catch (error) {
-                console.warn('⚠️ Supabase에서 데이터를 가져올 수 없습니다. 오프라인 모드로 진행합니다:', error);
-                // 오프라인 모드: 기본 데이터 사용
-                data = [
-                    { date: '2026-01-05', product: '무선 이어폰', amount: 4005000 },
-                    { date: '2026-01-05', product: '보조배터리', amount: 1120000 },
-                    { date: '2026-01-05', product: '텀블러', amount: 1950000 },
-                    { date: '2026-01-08', product: '무선 이어폰', amount: 4628000 },
-                    { date: '2026-01-08', product: '블루투스 스피커', amount: 2160000 },
-                    { date: '2026-01-08', product: '텀블러', amount: 1625000 },
-                    { date: '2026-01-12', product: '보조배터리', amount: 1435000 },
-                    { date: '2026-01-12', product: '무선 충전기', amount: 1305000 },
-                    { date: '2026-01-12', product: '에코백', amount: 1395000 },
-                    { date: '2026-01-15', product: '무선 이어폰', amount: 3382000 },
-                    { date: '2026-01-15', product: '블루투스 스피커', amount: 2640000 },
-                    { date: '2026-01-15', product: '텀블러', amount: 2100000 },
-                    { date: '2026-01-19', product: '보조배터리', amount: 1925000 },
-                    { date: '2026-01-19', product: '에코백', amount: 1650000 },
-                    { date: '2026-01-19', product: '무선 충전기', amount: 1485000 },
-                    { date: '2026-01-22', product: '무선 이어폰', amount: 5429000 },
-                    { date: '2026-01-22', product: '텀블러', amount: 1800000 },
-                    { date: '2026-01-22', product: '블루투스 스피커', amount: 1800000 },
-                    { date: '2026-01-26', product: '보조배터리', amount: 1680000 },
-                    { date: '2026-01-26', product: '에코백', amount: 1320000 },
-                    { date: '2026-01-26', product: '무선 충전기', amount: 1665000 },
-                    { date: '2026-02-01', product: '무선 이어폰', amount: 6230000 },
-                    { date: '2026-02-01', product: '텀블러', amount: 2375000 },
-                    { date: '2026-02-01', product: '보조배터리', amount: 1505000 },
-                    { date: '2026-02-05', product: '블루투스 스피커', amount: 3000000 },
-                    { date: '2026-02-05', product: '에코백', amount: 1800000 },
-                    { date: '2026-02-05', product: '무선 충전기', amount: 1395000 },
-                    { date: '2026-02-10', product: '무선 이어폰', amount: 5162000 },
-                    { date: '2026-02-10', product: '텀블러', amount: 1675000 },
-                    { date: '2026-02-10', product: '보조배터리', amount: 1365000 }
-                ];
-                renderCharts();
-            }
-        }
+        // 데이터 처리
+        const data = [
+            { date: '2026-01-05', product: '무선 이어폰', amount: 4005000 },
+            { date: '2026-01-05', product: '보조배터리', amount: 1120000 },
+            { date: '2026-01-05', product: '텀블러', amount: 1950000 },
+            { date: '2026-01-08', product: '무선 이어폰', amount: 4628000 },
+            { date: '2026-01-08', product: '블루투스 스피커', amount: 2160000 },
+            { date: '2026-01-08', product: '텀블러', amount: 1625000 },
+            { date: '2026-01-12', product: '보조배터리', amount: 1435000 },
+            { date: '2026-01-12', product: '무선 충전기', amount: 1305000 },
+            { date: '2026-01-12', product: '에코백', amount: 1395000 },
+            { date: '2026-01-15', product: '무선 이어폰', amount: 3382000 },
+            { date: '2026-01-15', product: '블루투스 스피커', amount: 2640000 },
+            { date: '2026-01-15', product: '텀블러', amount: 2100000 },
+            { date: '2026-01-19', product: '보조배터리', amount: 1925000 },
+            { date: '2026-01-19', product: '에코백', amount: 1650000 },
+            { date: '2026-01-19', product: '무선 충전기', amount: 1485000 },
+            { date: '2026-01-22', product: '무선 이어폰', amount: 5429000 },
+            { date: '2026-01-22', product: '텀블러', amount: 1800000 },
+            { date: '2026-01-22', product: '블루투스 스피커', amount: 1800000 },
+            { date: '2026-01-26', product: '보조배터리', amount: 1680000 },
+            { date: '2026-01-26', product: '에코백', amount: 1320000 },
+            { date: '2026-01-26', product: '무선 충전기', amount: 1665000 },
+            { date: '2026-02-01', product: '무선 이어폰', amount: 6230000 },
+            { date: '2026-02-01', product: '텀블러', amount: 2375000 },
+            { date: '2026-02-01', product: '보조배터리', amount: 1505000 },
+            { date: '2026-02-05', product: '블루투스 스피커', amount: 3000000 },
+            { date: '2026-02-05', product: '에코백', amount: 1800000 },
+            { date: '2026-02-05', product: '무선 충전기', amount: 1395000 },
+            { date: '2026-02-10', product: '무선 이어폰', amount: 5162000 },
+            { date: '2026-02-10', product: '텀블러', amount: 1675000 },
+            { date: '2026-02-10', product: '보조배터리', amount: 1365000 }
+        ];
 
         // 월별 매출 계산
         function getMonthlyRevenue() {
@@ -649,16 +618,11 @@
             tbody.innerHTML = html;
         }
 
-        // 모든 차트 렌더링
-        function renderCharts() {
-            drawLineChart();
-            drawBarChart();
-            renderSummaryTable();
-        }
-
         // 초기화
         initTheme();
-        fetchSalesData();
+        drawLineChart();
+        drawBarChart();
+        renderSummaryTable();
 
         // 윈도우 리사이즈 시 차트 다시 그리기
         let resizeTimer;

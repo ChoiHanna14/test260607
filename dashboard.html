@@ -707,84 +707,35 @@
             themeToggle.textContent = isDark ? '☀️' : '🌙';
         });
 
-        // Supabase 설정
-        const SUPABASE_URL = 'https://gpaeevgjounqazxecybr.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwYWVldmdqb3VucWF6eGVjeWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3NzcwMDAsImV4cCI6MTczMzMyOTAwMH0.o7xvLXQgKCXg_GLFDHvB7Ygeu7MvPJJB-1Fc1tMSqrI';
+        // 데이터
+        const todos = [
+            { text: "워크숍 후기 작성하기", priority: "높음", status: "대기" },
+            { text: "3월 프로모션 기획안 작성", priority: "높음", status: "진행중" },
+            { text: "인플루언서 미팅 일정 잡기", priority: "높음", status: "대기" },
+            { text: "영상 광고 3개 추가 제작", priority: "보통", status: "진행중" },
+            { text: "경쟁사 C사 캠페인 분석", priority: "보통", status: "대기" },
+            { text: "4월 신제품 티저 콘텐츠 기획", priority: "높음", status: "대기" },
+            { text: "SNS 계정 주간 콘텐츠 업로드", priority: "보통", status: "완료" },
+            { text: "블로그 포스트 2건 작성", priority: "낮음", status: "대기" },
+            { text: "고객 설문조사 결과 분석", priority: "보통", status: "진행중" }
+        ];
 
-        // 데이터 변수 (Supabase에서 가져올 데이터)
-        let todos = [];
-        let schedule = {};
-        let projects = [];
+        const schedule = {
+            "월": ["10:00 마케팅팀 주간회의", "14:00 신제품 런칭 킥오프 미팅"],
+            "화": ["09:00 3월 프로모션 기획안 마감", "11:00 디자인팀 협업 미팅", "15:00 파트너사 계약서 검토"],
+            "수": ["10:00 인플루언서 미팅", "14:00 고객 설문 결과 공유", "16:00 콘텐츠 편집 회의"],
+            "목": ["09:30 영상 광고 촬영", "13:00 점심 미팅 — 광고 대행사", "15:00 SNS 콘텐츠 리뷰"],
+            "금": ["10:00 유튜브 채널 리뉴얼 최종 검토", "14:00 주간 성과 리뷰", "16:00 다음 주 콘텐츠 캘린더 확정"]
+        };
 
-        // Supabase REST API에서 데이터 가져오기
-        async function fetchDataFromSupabase() {
-            try {
-                const headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Prefer': 'return=representation'
-                };
-
-                // Todos 가져오기
-                const todosRes = await fetch(`${SUPABASE_URL}/rest/v1/todos?select=*`, { headers });
-                const todosData = await todosRes.json();
-                todos = todosData.map(todo => ({
-                    text: todo.text,
-                    priority: todo.priority,
-                    status: todo.status
-                }));
-
-                // Schedules 가져오기
-                const schedulesRes = await fetch(`${SUPABASE_URL}/rest/v1/schedules?select=*`, { headers });
-                const schedulesData = await schedulesRes.json();
-                schedule = {};
-                schedulesData.forEach(s => {
-                    if (!schedule[s.day]) schedule[s.day] = [];
-                    schedule[s.day].push(`${s.time} ${s.event}`);
-                });
-
-                // Projects 가져오기
-                const projectsRes = await fetch(`${SUPABASE_URL}/rest/v1/projects?select=*`, { headers });
-                const projectsData = await projectsRes.json();
-                projects = projectsData.map(p => ({
-                    name: p.name,
-                    progress: p.progress
-                }));
-
-                console.log('✅ Supabase에서 데이터 로드 완료');
-                renderAllData();
-            } catch (error) {
-                console.warn('⚠️ Supabase에서 데이터를 가져올 수 없습니다. 오프라인 모드로 진행합니다:', error);
-                // 오프라인 모드: 기본값 사용
-                todos = [
-                    { text: "워크숍 후기 작성하기", priority: "높음", status: "대기" },
-                    { text: "3월 프로모션 기획안 작성", priority: "높음", status: "진행중" },
-                    { text: "인플루언서 미팅 일정 잡기", priority: "높음", status: "대기" },
-                    { text: "영상 광고 3개 추가 제작", priority: "보통", status: "진행중" },
-                    { text: "경쟁사 C사 캠페인 분석", priority: "보통", status: "대기" },
-                    { text: "4월 신제품 티저 콘텐츠 기획", priority: "높음", status: "대기" },
-                    { text: "SNS 계정 주간 콘텐츠 업로드", priority: "보통", status: "완료" },
-                    { text: "블로그 포스트 2건 작성", priority: "낮음", status: "대기" },
-                    { text: "고객 설문조사 결과 분석", priority: "보통", status: "진행중" }
-                ];
-                schedule = {
-                    "월": ["10:00 마케팅팀 주간회의", "14:00 신제품 런칭 킥오프 미팅"],
-                    "화": ["09:00 3월 프로모션 기획안 마감", "11:00 디자인팀 협업 미팅", "15:00 파트너사 계약서 검토"],
-                    "수": ["10:00 인플루언서 미팅", "14:00 고객 설문 결과 공유", "16:00 콘텐츠 편집 회의"],
-                    "목": ["09:30 영상 광고 촬영", "13:00 점심 미팅 — 광고 대행사", "15:00 SNS 콘텐츠 리뷰"],
-                    "금": ["10:00 유튜브 채널 리뉴얼 최종 검토", "14:00 주간 성과 리뷰", "16:00 다음 주 콘텐츠 캘린더 확정"]
-                };
-                projects = [
-                    { name: "봄맞이 프로모션", progress: 65 },
-                    { name: "신제품 런칭 캠페인", progress: 20 },
-                    { name: "인플루언서 협업", progress: 35 },
-                    { name: "유튜브 채널 리뉴얼", progress: 80 },
-                    { name: "고객 리텐션 프로그램", progress: 10 },
-                    { name: "홈페이지 리뉴얼", progress: 45 }
-                ];
-                renderAllData();
-            }
-        }
+        const projects = [
+            { name: "봄맞이 프로모션", progress: 65 },
+            { name: "신제품 런칭 캠페인", progress: 20 },
+            { name: "인플루언서 협업", progress: 35 },
+            { name: "유튜브 채널 리뉴얼", progress: 80 },
+            { name: "고객 리텐션 프로그램", progress: 10 },
+            { name: "홈페이지 리뉴얼", progress: 45 }
+        ];
 
         // 할 일 목록 렌더링
         function renderTodos() {
@@ -860,17 +811,12 @@
             `;
         }
 
-        // 모든 데이터 렌더링 함수
-        function renderAllData() {
-            renderTodos();
-            renderSchedule();
-            renderProjects();
-            renderMetrics();
-        }
-
         // 초기화
         initTheme();
-        fetchDataFromSupabase();
+        renderTodos();
+        renderSchedule();
+        renderProjects();
+        renderMetrics();
 
         // Service Worker 등록
         if ('serviceWorker' in navigator) {
