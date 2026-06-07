@@ -1,0 +1,88 @@
+<svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="800" height="200" fill="none"/>
+
+  <!-- 단계 1: 기획 -->
+  <g id="step1">
+    <!-- 둥근 사각형 -->
+    <rect x="20" y="40" width="120" height="120" rx="15" ry="15" fill="#C5E4FE" stroke="#A0C9FF" stroke-width="2"/>
+    <!-- 텍스트 -->
+    <text x="80" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">기획</text>
+  </g>
+
+  <!-- 화살표 1→2 -->
+  <g id="arrow1">
+    <!-- 화살표 라인 -->
+    <line x1="140" y1="100" x2="175" y2="100" stroke="#999" stroke-width="2"/>
+    <!-- 화살표 헤드 -->
+    <polygon points="175,100 165,95 167,100 165,105" fill="#999"/>
+  </g>
+
+  <!-- 단계 2: 제작 -->
+  <g id="step2">
+    <!-- 둥근 사각형 -->
+    <rect x="185" y="40" width="120" height="120" rx="15" ry="15" fill="#B3E5C1" stroke="#8ECDA8" stroke-width="2"/>
+    <!-- 텍스트 -->
+    <text x="245" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">제작</text>
+  </g>
+
+  <!-- 화살표 2→3 -->
+  <g id="arrow2">
+    <!-- 화살표 라인 -->
+    <line x1="305" y1="100" x2="340" y2="100" stroke="#999" stroke-width="2"/>
+    <!-- 화살표 헤드 -->
+    <polygon points="340,100 330,95 332,100 330,105" fill="#999"/>
+  </g>
+
+  <!-- 단계 3: 검토 -->
+  <g id="step3">
+    <!-- 둥근 사각형 -->
+    <rect x="350" y="40" width="120" height="120" rx="15" ry="15" fill="#FFE5B4" stroke="#FFD699" stroke-width="2"/>
+    <!-- 텍스트 -->
+    <text x="410" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">검토</text>
+  </g>
+
+  <!-- 화살표 3→4 -->
+  <g id="arrow3">
+    <!-- 화살표 라인 -->
+    <line x1="470" y1="100" x2="505" y2="100" stroke="#999" stroke-width="2"/>
+    <!-- 화살표 헤드 -->
+    <polygon points="505,100 495,95 497,100 495,105" fill="#999"/>
+  </g>
+
+  <!-- 단계 4: 배포 -->
+  <g id="step4">
+    <!-- 둥근 사각형 -->
+    <rect x="515" y="40" width="120" height="120" rx="15" ry="15" fill="#FFD4B3" stroke="#FFBC8F" stroke-width="2"/>
+    <!-- 텍스트 -->
+    <text x="575" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">배포</text>
+  </g>
+
+  <!-- 화살표 4→5 -->
+  <g id="arrow4">
+    <!-- 화살표 라인 -->
+    <line x1="635" y1="100" x2="670" y2="100" stroke="#999" stroke-width="2"/>
+    <!-- 화살표 헤드 -->
+    <polygon points="670,100 660,95 662,100 660,105" fill="#999"/>
+  </g>
+
+  <!-- 단계 5: 분석 -->
+  <g id="step5">
+    <!-- 둥근 사각형 -->
+    <rect x="680" y="40" width="100" height="120" rx="15" ry="15" fill="#FFCCE5" stroke="#FFB3D9" stroke-width="2"/>
+    <!-- 텍스트 -->
+    <text x="730" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">분석</text>
+  </g>
+
+  <!-- 호버 효과 스타일 (CSS in SVG) -->
+  <defs>
+    <style>
+      g:hover rect {
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+      }
+      g:hover text {
+        font-size: 17px;
+      }
+    </style>
+  </defs>
+</svg>

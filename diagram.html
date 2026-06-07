@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 프로세스 - 김비서</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.3);
+            --text-primary: #1a1a2e;
+            --text-secondary: #666666;
+            --accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        html.dark-mode {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a3e;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            padding: 40px 20px;
+            color: var(--text-primary);
+            transition: background 0.3s ease;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 10px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+
+        /* 네비게이션 메뉴 */
+        .dashboard-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95em;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(102, 126, 234, 0.08);
+        }
+
+        .nav-item.active {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.15);
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .diagram-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .back-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-back {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-back:active {
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .nav-links {
+                width: 100%;
+            }
+
+            .nav-link {
+                flex: 1;
+                text-align: center;
+            }
+
+            .dashboard-nav {
+                gap: 8px;
+                padding: 12px 15px;
+            }
+
+            .nav-item {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .diagram-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" title="테마 전환">🌙</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔄 업무 프로세스</h1>
+            <div class="nav-links">
+                <a class="nav-link" href="index.html">← 메인</a>
+                <a class="nav-link" href="dashboard.html">대시보드</a>
+            </div>
+        </div>
+
+        <nav class="dashboard-nav">
+            <a href="dashboard.html" class="nav-item">📊 대시보드</a>
+            <a href="meeting-result.html" class="nav-item">📋 회의록</a>
+            <a href="chart.html" class="nav-item">📈 매출 현황</a>
+            <a href="diagram.html" class="nav-item active">🔄 업무 프로세스</a>
+            <a href="report.html" class="nav-item">📝 사이트 분석</a>
+        </nav>
+
+        <div class="diagram-container">
+            <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- 배경 -->
+                <rect width="800" height="200" fill="none"/>
+
+                <!-- 단계 1: 기획 -->
+                <g id="step1">
+                    <rect x="20" y="40" width="120" height="120" rx="15" ry="15" fill="#C5E4FE" stroke="#A0C9FF" stroke-width="2"/>
+                    <text x="80" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">기획</text>
+                </g>
+
+                <!-- 화살표 1→2 -->
+                <g id="arrow1">
+                    <line x1="140" y1="100" x2="175" y2="100" stroke="#999" stroke-width="2"/>
+                    <polygon points="175,100 165,95 167,100 165,105" fill="#999"/>
+                </g>
+
+                <!-- 단계 2: 제작 -->
+                <g id="step2">
+                    <rect x="185" y="40" width="120" height="120" rx="15" ry="15" fill="#B3E5C1" stroke="#8ECDA8" stroke-width="2"/>
+                    <text x="245" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">제작</text>
+                </g>
+
+                <!-- 화살표 2→3 -->
+                <g id="arrow2">
+                    <line x1="305" y1="100" x2="340" y2="100" stroke="#999" stroke-width="2"/>
+                    <polygon points="340,100 330,95 332,100 330,105" fill="#999"/>
+                </g>
+
+                <!-- 단계 3: 검토 -->
+                <g id="step3">
+                    <rect x="350" y="40" width="120" height="120" rx="15" ry="15" fill="#FFE5B4" stroke="#FFD699" stroke-width="2"/>
+                    <text x="410" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">검토</text>
+                </g>
+
+                <!-- 화살표 3→4 -->
+                <g id="arrow3">
+                    <line x1="470" y1="100" x2="505" y2="100" stroke="#999" stroke-width="2"/>
+                    <polygon points="505,100 495,95 497,100 495,105" fill="#999"/>
+                </g>
+
+                <!-- 단계 4: 배포 -->
+                <g id="step4">
+                    <rect x="515" y="40" width="120" height="120" rx="15" ry="15" fill="#FFD4B3" stroke="#FFBC8F" stroke-width="2"/>
+                    <text x="575" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">배포</text>
+                </g>
+
+                <!-- 화살표 4→5 -->
+                <g id="arrow4">
+                    <line x1="635" y1="100" x2="670" y2="100" stroke="#999" stroke-width="2"/>
+                    <polygon points="670,100 660,95 662,100 660,105" fill="#999"/>
+                </g>
+
+                <!-- 단계 5: 분석 -->
+                <g id="step5">
+                    <rect x="680" y="40" width="100" height="120" rx="15" ry="15" fill="#FFCCE5" stroke="#FFB3D9" stroke-width="2"/>
+                    <text x="730" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1a1a2e">분석</text>
+                </g>
+
+                <defs>
+                    <style>
+                        g:hover rect {
+                            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+                        }
+                    </style>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="back-button">
+            <a href="dashboard.html" class="btn-back">← 대시보드로 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                html.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+            } else {
+                html.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark-mode');
+            const isDark = html.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+        });
+
+        initTheme();
+    </script>
+</body>
+</html>
