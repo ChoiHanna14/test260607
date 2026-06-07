@@ -1,0 +1,31 @@
+# 환경 변수
+.env
+.env.local
+.env.*.local
+
+# 데이터 파일 (Supabase에 저장됨)
+김비서-데이터/
+*.csv
+*.xlsx
+*.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node modules (만약 사용할 경우)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Supabase 로컬
+supabase/.branches/
+supabase/generated/
+
+# 빌드 결과
+dist/
+build/
