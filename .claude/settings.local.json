@@ -14,7 +14,18 @@
       "Bash(brew --version)",
       "Bash(npm i *)",
       "Bash(vercel --version)",
-      "Bash(vercel --prod --force)"
+      "Bash(vercel --prod --force)",
+      "Bash(supabase --version)",
+      "Bash(npm install *)",
+      "Bash(supabase whoami *)",
+      "Bash(supabase projects *)",
+      "Bash(cat > *)",
+      "Bash(pip3 install *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(curl -s https://gpaeevgjounqazxecybr.supabase.co/rest/v1/sales?select=* -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwYWVldmdqb3VucWF6eGVjeWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3NzcwMDAsImV4cCI6MTczMzMyOTAwMH0.o7xvLXQgKCXg_GLFDHvB7Ygeu7MvPJJB-1Fc1tMSqrI')",
+      "Bash(git commit -m 'fix: Revert Supabase API integration - restore hardcoded data *)"
     ]
   }
 }
