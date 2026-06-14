@@ -89,6 +89,18 @@ ${userData}
     const outputPath = path.join(projectRoot, 'brief.json');
     fs.writeFileSync(outputPath, JSON.stringify(briefingData, null, 2), 'utf-8');
 
+    // 히스토리 저장 (최대 20개 유지)
+    const historyPath = path.join(projectRoot, 'brief-history.json');
+    let briefHistory = [];
+    try {
+      if (fs.existsSync(historyPath)) {
+        briefHistory = JSON.parse(fs.readFileSync(historyPath, 'utf-8'));
+      }
+    } catch (e) {}
+    briefHistory.unshift({ updated_at: briefingData.updated_at, summary: briefingData.summary });
+    if (briefHistory.length > 20) briefHistory.length = 20;
+    fs.writeFileSync(historyPath, JSON.stringify(briefHistory, null, 2), 'utf-8');
+
     console.log('✅ 브리핑 생성 완료!');
     console.log('\n📋 생성된 브리핑:\n');
     console.log(briefingText);

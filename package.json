@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server.mjs",
     "brief": "node scripts/brief.mjs",
-    "meeting": "node scripts/meeting.mjs"
+    "meeting": "node scripts/meeting.mjs",
+    "analyze": "node scripts/analyze.mjs"
   },
   "keywords": [
     "task",
