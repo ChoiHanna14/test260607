@@ -542,6 +542,124 @@
             }
         }
 
+        /* 회의록 분석 카드 */
+        .meeting-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .meeting-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .meeting-header h2 { margin: 0; }
+
+        .meeting-meta {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .meeting-content {
+            color: var(--text-primary);
+            line-height: 1.8;
+            font-size: 0.95em;
+        }
+
+        /* 마크다운 테이블 스타일 */
+        .meeting-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9em;
+        }
+
+        .meeting-content th {
+            background: rgba(16, 185, 129, 0.15);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--text-primary);
+        }
+
+        .meeting-content td {
+            padding: 9px 12px;
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        .meeting-content tr:hover td {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .meeting-content h3 {
+            font-size: 1em;
+            color: #10b981;
+            margin: 18px 0 10px;
+        }
+
+        .meeting-content ul, .meeting-content ol {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        .meeting-content li {
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+
+        .meeting-content strong { color: var(--text-primary); }
+
+        .meeting-empty {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            line-height: 1.7;
+            background: rgba(16, 185, 129, 0.06);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px dashed rgba(16, 185, 129, 0.3);
+        }
+
+        .meeting-empty code {
+            background: rgba(16, 185, 129, 0.15);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #10b981;
+        }
+
+        .btn-meeting {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-meeting:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-meeting:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         /* AI 브리핑 카드 */
         .briefing-card {
             grid-column: 1 / -1;
@@ -727,6 +845,18 @@
     </nav>
 
     <div class="dashboard">
+        <!-- 0. 회의록 분석 -->
+        <div class="card meeting-card">
+            <div class="meeting-header">
+                <h2>📝 회의록 분석</h2>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span class="meeting-meta" id="meetingUpdatedAt"></span>
+                    <button class="btn-meeting" id="btnMeeting">🔄 다시 분석</button>
+                </div>
+            </div>
+            <div id="meetingContent"></div>
+        </div>
+
         <!-- 0. AI 아침 브리핑 -->
         <div class="card briefing-card">
             <div class="briefing-header">
@@ -898,6 +1028,85 @@
             `;
         }
 
+        // 마크다운을 HTML로 간단 변환
+        function mdToHtml(text) {
+            return text
+                // 헤더
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+                // 굵은 텍스트
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                // 표: 헤더 구분선 제거
+                .replace(/^\|[-:| ]+\|$/gm, '')
+                // 표: 행 변환
+                .replace(/^\|(.+)\|$/gm, (_, row) => {
+                    const cells = row.split('|').map(c => c.trim());
+                    return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+                })
+                // 표 행들을 table로 감싸기
+                .replace(/((<tr>.+<\/tr>\n?)+)/g, '<table><tbody>$1</tbody></table>')
+                // 첫 번째 tr을 thead로
+                .replace(/<table><tbody>(<tr>(.+?)<\/tr>)/g, '<table><thead>$1</thead><tbody>')
+                .replace(/<\/thead><tbody>(<tr>)/g, '</thead><tbody>$1')
+                // 불릿 리스트
+                .replace(/^\* (.+)$/gm, '<li>$1</li>')
+                .replace(/^- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+                // 수평선
+                .replace(/^---+$/gm, '<hr>')
+                // 빈 줄 → 단락 구분
+                .replace(/\n\n/g, '<br>');
+        }
+
+        // 회의록 분석 로드
+        async function loadMeeting() {
+            const contentEl = document.getElementById('meetingContent');
+            const updatedEl = document.getElementById('meetingUpdatedAt');
+            const btn = document.getElementById('btnMeeting');
+
+            try {
+                const res = await fetch('./meeting-result.json?t=' + Date.now());
+                if (!res.ok) throw new Error('파일 없음');
+                const data = await res.json();
+
+                const date = new Date(data.updated_at);
+                const formatted = date.toLocaleString('ko-KR', {
+                    month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+                updatedEl.textContent = `마지막 분석: ${formatted}`;
+
+                // 분석된 파일 목록
+                const filesHtml = data.files_analyzed
+                    ? `<div style="font-size:0.8em;color:var(--text-secondary);margin-bottom:12px;">
+                         분석 파일: ${data.files_analyzed.join(', ')}
+                       </div>`
+                    : '';
+
+                contentEl.innerHTML = filesHtml +
+                    `<div class="meeting-content">${mdToHtml(data.analysis)}</div>`;
+
+            } catch (e) {
+                updatedEl.textContent = '';
+                contentEl.innerHTML = `
+                    <div class="meeting-empty">
+                        아직 분석된 회의록이 없습니다.<br>
+                        터미널에서 아래 명령어를 실행해보세요 👇<br><br>
+                        <code>npm run meeting</code>
+                    </div>`;
+            }
+
+            btn.addEventListener('click', () => {
+                btn.disabled = true;
+                btn.textContent = '⏳ 터미널에서 npm run meeting 실행 후 새로고침';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = '🔄 다시 분석';
+                }, 4000);
+                loadMeeting();
+            });
+        }
+
         // AI 아침 브리핑 로드
         async function loadBriefing() {
             const contentEl = document.getElementById('briefingContent');
@@ -943,6 +1152,7 @@
 
         // 초기화
         initTheme();
+        loadMeeting();
         loadBriefing();
         renderTodos();
         renderSchedule();

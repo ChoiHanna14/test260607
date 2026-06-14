@@ -5,7 +5,8 @@
   "type": "module",
   "main": "index.html",
   "scripts": {
-    "brief": "node scripts/brief.mjs"
+    "brief": "node scripts/brief.mjs",
+    "meeting": "node scripts/meeting.mjs"
   },
   "keywords": [
     "task",
