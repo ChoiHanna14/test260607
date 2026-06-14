@@ -1,0 +1,235 @@
+/* 실시간 번역앱 - 공통 스타일 (김비서 글래스모피즘 테마) */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(255, 255, 255, 0.3);
+  --text-primary: #1a1a2e;
+  --text-secondary: #666666;
+  --accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --accent-hover: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+html.dark-mode {
+  --bg-primary: #0f0f23;
+  --bg-secondary: #1a1a3e;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  min-height: 100vh;
+  color: var(--text-primary);
+  transition: background 0.3s ease;
+  padding: 20px;
+  padding-bottom: 90px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+header.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+  background: var(--accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-toggle {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(10px);
+  padding: 8px 13px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: transform 0.3s ease;
+  box-shadow: var(--shadow);
+}
+.theme-toggle:hover { transform: scale(1.1); }
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(10px);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+
+label.field-label {
+  display: block;
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+textarea, input[type='text'] {
+  width: 100%;
+  background: rgba(127, 127, 127, 0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px;
+  color: var(--text-primary);
+  font-size: 1em;
+  font-family: inherit;
+  resize: vertical;
+}
+textarea { min-height: 110px; }
+textarea:focus, input:focus { outline: 2px solid rgba(102, 126, 234, 0.5); }
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 14px 22px;
+  font-size: 1em;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.btn.secondary {
+  background: rgba(127, 127, 127, 0.12);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+.result-ko {
+  font-size: 1.15em;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin-bottom: 12px;
+}
+.result-original {
+  font-size: 0.92em;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  border-top: 1px solid var(--card-border);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.muted { color: var(--text-secondary); font-size: 0.9em; line-height: 1.6; }
+.spinner {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 3px solid rgba(127,127,127,0.3);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-box {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 0.92em;
+}
+
+/* 하단 네비게이션 */
+nav.bottom {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16px;
+  display: flex;
+  gap: 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(14px);
+  padding: 8px;
+  border-radius: 50px;
+  box-shadow: var(--shadow);
+  z-index: 50;
+}
+nav.bottom a {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.8em;
+  padding: 8px 14px;
+  border-radius: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.2s ease;
+}
+nav.bottom a .ico { font-size: 1.25em; }
+nav.bottom a.active { background: var(--accent); color: #fff; }
+
+/* 스크린샷 탭-번역 */
+.image-stage { position: relative; display: inline-block; max-width: 100%; }
+.image-stage img { max-width: 100%; display: block; border-radius: 14px; }
+.overlay-block {
+  position: absolute;
+  background: rgba(102, 126, 234, 0.82);
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1.25;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.overlay-block:hover { background: rgba(118, 75, 162, 0.92); }
+
+.history-item { display: flex; flex-direction: column; gap: 6px; }
+.history-item + .history-item { border-top: 1px solid var(--card-border); padding-top: 14px; margin-top: 14px; }
+.history-meta { font-size: 0.78em; color: var(--text-secondary); }
+.toast {
+  position: fixed;
+  bottom: 84px; left: 50%; transform: translateX(-50%);
+  background: var(--text-primary); color: var(--bg-primary);
+  padding: 10px 18px; border-radius: 50px; font-size: 0.9em;
+  opacity: 0; transition: opacity 0.3s ease; z-index: 100;
+}
+.toast.show { opacity: 0.95; }

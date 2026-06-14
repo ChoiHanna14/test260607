@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimsecretary-v1';
+const CACHE_NAME = 'kimsecretary-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,7 +9,13 @@ const ASSETS_TO_CACHE = [
   './diagram.svg',
   './report.html',
   './manifest.json',
-  './service-worker.js'
+  './service-worker.js',
+  './translator/index.html',
+  './translator/screenshot.html',
+  './translator/history.html',
+  './translator/settings.html',
+  './translator/styles.css',
+  './translator/app.js'
 ];
 
 // Service Worker 설치

@@ -89,6 +89,15 @@
       ]
     }
   ],
+  "share_target": {
+    "action": "./translator/index.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "categories": ["productivity", "business"],
   "screenshots_min_width": 320,
   "screenshots_min_height": 320

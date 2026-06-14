@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#667eea" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>스크린샷 번역 - 실시간 번역앱</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <h1>📷 스크린샷 번역</h1>
+      <button class="theme-toggle" id="themeToggle" title="테마 전환">🌙</button>
+    </header>
+
+    <div class="card">
+      <label class="field-label" for="file">이미지 불러오기 (스크린샷 / 사진)</label>
+      <input type="file" id="file" accept="image/*" />
+      <div class="btn-row" style="margin-top: 14px;">
+        <span id="status" class="muted">이미지를 선택하면 일본어를 자동으로 찾아 번역합니다.</span>
+      </div>
+    </div>
+
+    <div class="card" id="stageCard" style="display: none;">
+      <div class="muted" style="margin-bottom: 10px;">번역 블록을 탭하면 한국어가 복사됩니다.</div>
+      <div class="image-stage" id="stage">
+        <img id="preview" alt="미리보기" />
+      </div>
+    </div>
+
+    <div class="card" id="listCard" style="display: none;">
+      <label class="field-label">번역 결과</label>
+      <div id="list"></div>
+    </div>
+  </div>
+
+  <nav class="bottom">
+    <a href="./index.html"><span class="ico">📝</span>번역</a>
+    <a href="./screenshot.html" class="active"><span class="ico">📷</span>스크린샷</a>
+    <a href="./history.html"><span class="ico">📜</span>기록</a>
+    <a href="./settings.html"><span class="ico">⚙️</span>설정</a>
+  </nav>
+
+  <script src="./app.js"></script>
+  <script>
+    const fileInput = document.getElementById('file');
+    const status = document.getElementById('status');
+    const stageCard = document.getElementById('stageCard');
+    const stage = document.getElementById('stage');
+    const preview = document.getElementById('preview');
+    const listCard = document.getElementById('listCard');
+    const list = document.getElementById('list');
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      // 미리보기 표시
+      const dataUrl = await readAsDataURL(file);
+      preview.src = dataUrl;
+      stageCard.style.display = 'block';
+      listCard.style.display = 'none';
+      clearOverlays();
+      status.innerHTML = '<span class="spinner"></span> 일본어를 찾아 번역 중...';
+
+      try {
+        const base64 = dataUrl.split(',')[1];
+        const data = await translate({ image: base64, mediaType: file.type || 'image/png' });
+        renderBlocks(data.blocks || []);
+        status.textContent = (data.blocks && data.blocks.length)
+          ? data.blocks.length + '개 블록을 번역했어요.'
+          : '일본어를 찾지 못했어요.';
+      } catch (e) {
+        status.innerHTML = '<span class="error-box">' + e.message + '</span>';
+      }
+    });
+
+    function renderBlocks(blocks) {
+      // 이미지가 다 그려진 뒤 오버레이 위치를 잡아야 정확함
+      const draw = () => {
+        clearOverlays();
+        blocks.forEach((b) => {
+          const div = document.createElement('div');
+          div.className = 'overlay-block';
+          const box = b.box || { x: 0, y: 0, w: 0.3, h: 0.06 };
+          div.style.left = (box.x * 100) + '%';
+          div.style.top = (box.y * 100) + '%';
+          div.style.width = Math.max(box.w * 100, 8) + '%';
+          div.style.minHeight = Math.max(box.h * 100, 3) + '%';
+          div.textContent = b.translation;
+          div.title = b.original;
+          div.addEventListener('click', () => copyText(b.translation));
+          stage.appendChild(div);
+        });
+      };
+      if (preview.complete) draw();
+      else preview.onload = draw;
+
+      // 결과 리스트도 같이 표시
+      list.innerHTML = '';
+      blocks.forEach((b) => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML =
+          '<div class="result-ko" style="font-size:1.02em">' + escapeHtml(b.translation) + '</div>' +
+          '<div class="history-meta">원문: ' + escapeHtml(b.original) + '</div>';
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', () => copyText(b.translation));
+        list.appendChild(item);
+        history_add(b.original, b.translation);
+      });
+      listCard.style.display = blocks.length ? 'block' : 'none';
+    }
+
+    function clearOverlays() {
+      stage.querySelectorAll('.overlay-block').forEach((el) => el.remove());
+    }
+    function readAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+    function escapeHtml(s) {
+      return (s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+  </script>
+</body>
+</html>

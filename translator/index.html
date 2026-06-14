@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#667eea" />
+  <meta name="description" content="일본어를 한국어로 실시간 번역" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="번역앱" />
+  <title>실시간 번역앱</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <h1>🇯🇵→🇰🇷 실시간 번역</h1>
+      <button class="theme-toggle" id="themeToggle" title="테마 전환">🌙</button>
+    </header>
+
+    <div class="card">
+      <label class="field-label" for="input">일본어 입력 / 붙여넣기</label>
+      <textarea id="input" placeholder="번역할 일본어를 입력하거나 붙여넣으세요."></textarea>
+      <div class="btn-row" style="margin-top: 14px;">
+        <button class="btn" id="translateBtn">번역하기</button>
+        <button class="btn secondary" id="pasteBtn">붙여넣기</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </div>
+
+    <div class="card" id="resultCard" style="display: none;">
+      <div class="result-ko" id="resultKo"></div>
+      <div class="result-original" id="resultOrig"></div>
+      <div class="btn-row" style="margin-top: 14px;">
+        <button class="btn secondary" id="copyBtn">📋 한국어 복사</button>
+      </div>
+    </div>
+
+    <div class="card muted">
+      <strong>사용 방법</strong><br />
+      일본 앱에서 텍스트를 길게 눌러 <b>공유 → 실시간 번역앱</b>을 선택하면
+      이 화면에서 자동으로 번역됩니다. 이미지 속 일본어는 아래
+      <b>📷 스크린샷</b>에서 번역하세요.
+    </div>
+  </div>
+
+  <nav class="bottom">
+    <a href="./index.html" class="active"><span class="ico">📝</span>번역</a>
+    <a href="./screenshot.html"><span class="ico">📷</span>스크린샷</a>
+    <a href="./history.html"><span class="ico">📜</span>기록</a>
+    <a href="./settings.html"><span class="ico">⚙️</span>설정</a>
+  </nav>
+
+  <script src="./app.js"></script>
+  <script>
+    const input = document.getElementById('input');
+    const status = document.getElementById('status');
+    const resultCard = document.getElementById('resultCard');
+    const resultKo = document.getElementById('resultKo');
+    const resultOrig = document.getElementById('resultOrig');
+    const translateBtn = document.getElementById('translateBtn');
+
+    async function run() {
+      const text = input.value.trim();
+      if (!text) {
+        showToast('일본어를 입력해 주세요');
+        return;
+      }
+      translateBtn.disabled = true;
+      status.innerHTML = '<span class="spinner"></span> 번역 중...';
+      resultCard.style.display = 'none';
+      try {
+        const data = await translate({ text });
+        resultKo.textContent = data.translation || '';
+        resultOrig.textContent = '원문: ' + (data.original || text);
+        resultCard.style.display = 'block';
+        history_add(data.original || text, data.translation);
+        status.textContent = '';
+      } catch (e) {
+        status.innerHTML = '<span class="error-box">' + e.message + '</span>';
+      } finally {
+        translateBtn.disabled = false;
+      }
+    }
+
+    translateBtn.addEventListener('click', run);
+    document.getElementById('copyBtn').addEventListener('click', () => copyText(resultKo.textContent));
+    document.getElementById('pasteBtn').addEventListener('click', async () => {
+      try {
+        input.value = await navigator.clipboard.readText();
+      } catch {
+        showToast('붙여넣기 권한이 필요해요');
+      }
+    });
+
+    // 공유(Share Target)로 전달된 텍스트 자동 번역
+    const params = new URLSearchParams(location.search);
+    const shared = params.get('text') || params.get('title') || params.get('url');
+    if (shared) {
+      input.value = shared;
+      run();
+    }
+  </script>
+</body>
+</html>
