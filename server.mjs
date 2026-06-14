@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
+import { google } from 'googleapis';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,31 @@ dotenv.config({ path: path.join(__dirname, '.env.local') });
 
 const app = express();
 const PORT = 3000;
+
+// ===== Google OAuth 설정 =====
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  'http://localhost:3000/auth/callback'
+);
+
+// 토큰 파일 경로 (gitignore에 추가됨)
+const TOKEN_PATH = path.join(__dirname, '.google-token.json');
+
+function loadToken() {
+  try {
+    if (fs.existsSync(TOKEN_PATH)) {
+      const token = JSON.parse(fs.readFileSync(TOKEN_PATH, 'utf-8'));
+      oauth2Client.setCredentials(token);
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function saveToken(token) {
+  fs.writeFileSync(TOKEN_PATH, JSON.stringify(token, null, 2), 'utf-8');
+}
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -32,6 +58,115 @@ function loadDataContext() {
   }
   return parts.join('\n\n') || '데이터 없음';
 }
+
+// ===== Google OAuth 라우트 =====
+
+// Step 1: Google 로그인 페이지로 이동
+app.get('/auth/google', (req, res) => {
+  const url = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'consent',
+    scope: [
+      'https://www.googleapis.com/auth/calendar.readonly',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email'
+    ]
+  });
+  res.redirect(url);
+});
+
+// Step 2: Google 인증 후 콜백
+app.get('/auth/callback', async (req, res) => {
+  const { code } = req.query;
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+    saveToken(tokens);
+    console.log('✅ Google 로그인 완료, 토큰 저장됨');
+    res.send(`
+      <script>
+        window.opener?.postMessage('google-auth-success', '*');
+        window.close();
+      </script>
+      <p>✅ 로그인 완료! 이 창을 닫아주세요.</p>
+    `);
+  } catch (e) {
+    console.error('❌ OAuth 콜백 오류:', e.message);
+    res.status(500).send('인증 실패: ' + e.message);
+  }
+});
+
+// Step 3: 로그인 상태 확인
+app.get('/api/auth/status', (req, res) => {
+  const loggedIn = loadToken();
+  if (loggedIn) {
+    const creds = oauth2Client.credentials;
+    res.json({ loggedIn: true, expiry: creds.expiry_date });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
+// Step 4: 로그아웃
+app.post('/api/auth/logout', (req, res) => {
+  try {
+    if (fs.existsSync(TOKEN_PATH)) fs.unlinkSync(TOKEN_PATH);
+    oauth2Client.revokeCredentials();
+  } catch (e) {}
+  res.json({ ok: true });
+});
+
+// ===== Google Calendar API =====
+app.get('/api/calendar', async (req, res) => {
+  if (!loadToken()) {
+    return res.status(401).json({ error: 'NOT_LOGGED_IN' });
+  }
+
+  try {
+    // 토큰 만료 시 자동 갱신
+    oauth2Client.on('tokens', (tokens) => {
+      const current = JSON.parse(fs.readFileSync(TOKEN_PATH, 'utf-8'));
+      saveToken({ ...current, ...tokens });
+    });
+
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+    // 오늘부터 30일간 일정
+    const now = new Date();
+    const thirtyDaysLater = new Date();
+    thirtyDaysLater.setDate(now.getDate() + 30);
+
+    const response = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: now.toISOString(),
+      timeMax: thirtyDaysLater.toISOString(),
+      singleEvents: true,
+      orderBy: 'startTime',
+      maxResults: 20
+    });
+
+    const events = (response.data.items || []).map(event => ({
+      id: event.id,
+      title: event.summary || '(제목 없음)',
+      start: event.start.dateTime || event.start.date,
+      end: event.end.dateTime || event.end.date,
+      isAllDay: !event.start.dateTime,
+      location: event.location || null,
+      description: event.description || null,
+      color: event.colorId || null
+    }));
+
+    console.log(`📅 캘린더 이벤트 ${events.length}개 로드`);
+    res.json({ events });
+
+  } catch (e) {
+    console.error('❌ Calendar API 오류:', e.message);
+    if (e.code === 401) {
+      return res.status(401).json({ error: 'TOKEN_EXPIRED' });
+    }
+    res.status(500).json({ error: '캘린더 로드 실패' });
+  }
+});
 
 // API: 브리핑
 app.post('/api/brief', (req, res) => {

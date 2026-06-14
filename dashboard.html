@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#667eea">
+    <!-- Google 인증 -->
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="./auth.js"></script>
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23667eea' width='192' height='192' rx='45'/><text x='50%' y='50%' font-size='80' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle'>김</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1049,6 +1052,128 @@
             transition: all 0.2s;
         }
         .btn-save-note:hover { background: rgba(102,126,234,0.25); }
+
+        /* ===== Google Calendar (월별 그리드) ===== */
+        .calendar-card { grid-column: 1 / -1; }
+
+        .cal-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .cal-nav-btn {
+            width: 32px; height: 32px;
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 1em;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .cal-nav-btn:hover { background: rgba(102,126,234,0.12); border-color: #667eea; }
+        .cal-month-title { font-size: 1.1em; font-weight: 700; color: var(--text-primary); min-width: 100px; text-align: center; }
+        .cal-meta { font-size: 0.8em; color: var(--text-secondary); margin-top: 2px; }
+
+        /* 요일 헤더 */
+        .cal-grid-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+        .cal-grid-header span {
+            text-align: center;
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 6px 0;
+        }
+        .cal-grid-header span:first-child { color: #ef4444; }
+        .cal-grid-header span:last-child  { color: #667eea; }
+
+        /* 날짜 그리드 */
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+        }
+        .cal-cell {
+            min-height: 72px;
+            padding: 5px 6px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: transparent;
+            transition: background 0.15s;
+            cursor: default;
+        }
+        .cal-cell:hover { background: rgba(102,126,234,0.05); }
+        .cal-cell.other-month { opacity: 0.3; }
+        .cal-cell.today { border-color: #667eea; background: rgba(102,126,234,0.07); }
+        .cal-cell.has-event { cursor: pointer; }
+
+        .cal-day-num {
+            font-size: 0.82em;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+            line-height: 1;
+        }
+        .cal-cell.today .cal-day-num {
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.78em;
+        }
+        .cal-cell.sunday .cal-day-num { color: #ef4444; }
+        .cal-cell.saturday .cal-day-num { color: #667eea; }
+
+        /* 이벤트 칩 */
+        .cal-chip {
+            font-size: 0.68em;
+            padding: 2px 5px;
+            border-radius: 4px;
+            background: rgba(102,126,234,0.18);
+            color: #667eea;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        .cal-chip.allday { background: rgba(245,158,11,0.18); color: #d97706; }
+        .cal-chip.more { background: rgba(102,126,234,0.08); color: var(--text-secondary); text-align: center; }
+
+        /* 선택된 날 이벤트 목록 */
+        .cal-detail {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--card-border);
+            display: none;
+        }
+        .cal-detail.show { display: block; }
+        .cal-detail-title { font-size: 0.85em; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
+        .cal-detail-list { display: flex; flex-direction: column; gap: 6px; }
+        .cal-detail-item {
+            display: flex; gap: 10px; align-items: center;
+            padding: 8px 12px;
+            background: rgba(102,126,234,0.06);
+            border-left: 3px solid #667eea;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.88em;
+        }
+        .cal-detail-item .ev-time { color: var(--text-secondary); white-space: nowrap; font-size: 0.88em; }
+        .cal-detail-item .ev-title { color: var(--text-primary); font-weight: 600; }
+        .cal-detail-item .ev-loc { color: var(--text-secondary); font-size: 0.85em; }
+
+        .cal-empty {
+            text-align: center; padding: 30px;
+            color: var(--text-secondary); font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -1145,6 +1270,29 @@
                     <span class="notes-saved-msg" id="notesSavedMsg">✅ 저장됨</span>
                     <button class="btn-save-note" onclick="saveBriefNote()">저장</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Google Calendar 월별 그리드 -->
+        <div class="card calendar-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <h2>📅 Google 캘린더</h2>
+                    <div class="cal-meta" id="calMeta"></div>
+                </div>
+                <div class="cal-nav">
+                    <button class="cal-nav-btn" onclick="calMove(-1)">‹</button>
+                    <div class="cal-month-title" id="calMonthTitle"></div>
+                    <button class="cal-nav-btn" onclick="calMove(1)">›</button>
+                    <button class="cal-nav-btn" onclick="calMove(0)" title="오늘" style="font-size:0.7em; width:auto; padding:0 10px; border-radius:50px;">오늘</button>
+                </div>
+            </div>
+            <div id="calendarContent">
+                <div class="cal-empty">📋 <code>npm run setup:google</code> → <code>npm run fetch:calendar</code></div>
+            </div>
+            <div class="cal-detail" id="calDetail">
+                <div class="cal-detail-title" id="calDetailTitle"></div>
+                <div class="cal-detail-list" id="calDetailList"></div>
             </div>
         </div>
 
@@ -1310,6 +1458,7 @@
         // ===== 마크다운 → HTML 렌더러 =====
         function renderMarkdown(raw) {
             if (!raw) return '';
+            try {
             // XSS 방지: < > 이스케이프 (단, 이미 HTML 태그인 것은 아님 — raw text만 들어옴)
             let text = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -1369,6 +1518,11 @@
             text = text.replace(/\n/g, '<br>');
 
             return `<div class="md-body">${text}</div>`;
+            } catch(e) {
+                // renderMarkdown 오류 시 안전하게 텍스트만 표시
+                console.warn('renderMarkdown 오류:', e);
+                return `<div class="md-body" style="white-space:pre-wrap">${raw.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+            }
         }
 
         // ===== 서버 로컬 여부 =====
@@ -1415,6 +1569,7 @@
                 contentEl.innerHTML = filesHtml + `<div class="meeting-content">${renderMarkdown(data.analysis)}</div>`;
 
             } catch (e) {
+                console.warn('loadMeeting 오류:', e);
                 updatedEl.textContent = '';
                 contentEl.innerHTML = isLocal
                     ? `<div class="meeting-empty">버튼을 눌러 회의록을 분석해보세요! 🚀</div>`
@@ -1457,6 +1612,7 @@
                 contentEl.innerHTML = renderMarkdown(data.summary);
 
             } catch (e) {
+                console.warn('loadBriefing 오류:', e);
                 updatedEl.textContent = '';
                 contentEl.innerHTML = isLocal
                     ? `<div class="briefing-empty">버튼을 눌러 오늘의 브리핑을 받아보세요! 🚀</div>`
@@ -1645,12 +1801,138 @@
             }
         }
 
+        // ===== Google Calendar 월별 그리드 =====
+        const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+        const MONTHS_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+        let calEvents = [];
+        let calYear  = new Date().getFullYear();
+        let calMonth = new Date().getMonth(); // 0-indexed
+
+        function calMove(dir) {
+            if (dir === 0) { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); }
+            else { calMonth += dir; if (calMonth > 11) { calMonth = 0; calYear++; } else if (calMonth < 0) { calMonth = 11; calYear--; } }
+            renderCalGrid();
+        }
+
+        function renderCalGrid() {
+            const contentEl = document.getElementById('calendarContent');
+            const titleEl   = document.getElementById('calMonthTitle');
+            const detailEl  = document.getElementById('calDetail');
+            titleEl.textContent = `${calYear}년 ${MONTHS_KO[calMonth]}`;
+            detailEl.classList.remove('show');
+
+            // 이달 첫날/마지막날
+            const firstDay = new Date(calYear, calMonth, 1);
+            const lastDay  = new Date(calYear, calMonth + 1, 0);
+            const startDow = firstDay.getDay(); // 0=일
+            const today    = new Date(); today.setHours(0,0,0,0);
+
+            // 날짜별 이벤트 맵
+            const evMap = {};
+            calEvents.forEach(ev => {
+                const d = new Date(ev.start);
+                const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                (evMap[key] = evMap[key] || []).push(ev);
+            });
+
+            // 요일 헤더
+            let html = '<div class="cal-grid-header">' + WEEKDAYS.map(d => `<span>${d}</span>`).join('') + '</div>';
+            html += '<div class="cal-grid">';
+
+            // 이전달 빈칸
+            for (let i = 0; i < startDow; i++) {
+                const d = new Date(calYear, calMonth, -startDow + i + 1);
+                html += `<div class="cal-cell other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;
+            }
+
+            // 이번달 날짜
+            for (let d = 1; d <= lastDay.getDate(); d++) {
+                const date   = new Date(calYear, calMonth, d);
+                const dow    = date.getDay();
+                const isToday = date.getTime() === today.getTime();
+                const key    = `${calYear}-${calMonth}-${d}`;
+                const evs    = evMap[key] || [];
+                const cls    = ['cal-cell', isToday ? 'today' : '', dow===0 ? 'sunday' : '', dow===6 ? 'saturday' : '', evs.length ? 'has-event' : ''].filter(Boolean).join(' ');
+                const onclick = evs.length ? `onclick="showCalDetail('${key}', ${d})"` : '';
+
+                let chips = evs.slice(0, 2).map(ev => {
+                    const t = ev.title.replace(/</g,'&lt;');
+                    return `<div class="cal-chip${ev.isAllDay?' allday':''}">${t}</div>`;
+                }).join('');
+                if (evs.length > 2) chips += `<div class="cal-chip more">+${evs.length - 2}개</div>`;
+
+                html += `<div class="${cls}" ${onclick}>
+                    <div class="cal-day-num">${d}</div>
+                    ${chips}
+                </div>`;
+            }
+
+            // 다음달 빈칸 (6주 채우기)
+            const total = startDow + lastDay.getDate();
+            const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+            for (let i = 1; i <= remain; i++) {
+                html += `<div class="cal-cell other-month"><div class="cal-day-num">${i}</div></div>`;
+            }
+
+            html += '</div>';
+            contentEl.innerHTML = html;
+        }
+
+        function showCalDetail(key, day) {
+            const evMap = {};
+            calEvents.forEach(ev => {
+                const d = new Date(ev.start);
+                const k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                (evMap[k] = evMap[k] || []).push(ev);
+            });
+            const evs = evMap[key] || [];
+            const detailEl  = document.getElementById('calDetail');
+            const titleEl   = document.getElementById('calDetailTitle');
+            const listEl    = document.getElementById('calDetailList');
+            titleEl.textContent = `${calYear}년 ${MONTHS_KO[calMonth]} ${day}일 일정`;
+            listEl.innerHTML = evs.map(ev => {
+                let timeStr = '종일';
+                if (!ev.isAllDay) {
+                    const s = new Date(ev.start), e = new Date(ev.end);
+                    timeStr = `${s.getHours().toString().padStart(2,'0')}:${s.getMinutes().toString().padStart(2,'0')} ~ ${e.getHours().toString().padStart(2,'0')}:${e.getMinutes().toString().padStart(2,'0')}`;
+                }
+                return `<div class="cal-detail-item">
+                    <span class="ev-time">${timeStr}</span>
+                    <div>
+                        <div class="ev-title">${ev.title.replace(/</g,'&lt;')}</div>
+                        ${ev.location ? `<div class="ev-loc">📍 ${ev.location.replace(/</g,'&lt;')}</div>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+            detailEl.classList.add('show');
+        }
+
+        async function loadCalendarData() {
+            const metaEl = document.getElementById('calMeta');
+            try {
+                const res = await fetch('./calendar-data.json?t=' + Date.now());
+                if (!res.ok) throw new Error('없음');
+                const data = await res.json();
+                calEvents = data.events || [];
+                const fmt = new Date(data.updated_at).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                metaEl.textContent = `마지막 업데이트: ${fmt} · ${calEvents.length}개`;
+                renderCalGrid();
+            } catch (e) {
+                document.getElementById('calMonthTitle').textContent = '';
+                document.getElementById('calendarContent').innerHTML =
+                    `<div class="cal-empty">📋 <code>npm run setup:google</code> → <code>npm run fetch:calendar</code></div>`;
+            }
+        }
+
         // ===== 초기화 =====
+        requireAuth(); // 로그인 안 됐으면 login.html로 이동
         initTheme();
         loadMeeting();
         loadBriefing();
         loadAnalysis();
         loadBriefNote();
+        loadCalendarData();
         renderTodos();
         renderSchedule();
         renderProjects();

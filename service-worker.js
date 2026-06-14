@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimsecretary-v1';
+const CACHE_NAME = 'kimsecretary-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -42,26 +42,30 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 네트워크 요청 처리 (Cache First 전략)
+// 네트워크 요청 처리
 self.addEventListener('fetch', event => {
-  // GET 요청만 캐시
-  if (event.request.method !== 'GET') {
-    return;
+  const url = new URL(event.request.url);
+
+  // POST 요청, JSON 파일, API 경로는 캐시 없이 항상 네트워크 직접 요청
+  if (
+    event.request.method !== 'GET' ||
+    url.pathname.endsWith('.json') ||
+    url.pathname.startsWith('/api/')
+  ) {
+    return; // 서비스 워커 개입 없이 브라우저가 직접 처리
   }
 
+  // 정적 HTML/CSS/JS/이미지만 Cache First 전략
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // 캐시에 있으면 반환
         if (response) {
           console.log(`📦 캐시에서 로드: ${event.request.url}`);
           return response;
         }
 
-        // 캐시에 없으면 네트워크에서 요청
         return fetch(event.request)
           .then(response => {
-            // 네트워크 응답이 유효하면 캐시에 저장
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
@@ -73,9 +77,8 @@ self.addEventListener('fetch', event => {
 
             return response;
           })
-          .catch(err => {
+          .catch(() => {
             console.error('🔌 오프라인 상태:', event.request.url);
-            // 오프라인일 때 캐시된 페이지 반환
             return caches.match('./index.html');
           });
       })

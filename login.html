@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>김비서 — 로그인</title>
+  <script src="https://accounts.google.com/gsi/client" async></script>
+  <script src="./auth.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    /* 배경 블러 원 */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    body::before { width: 500px; height: 500px; background: #a78bfa; top: -150px; left: -150px; }
+    body::after  { width: 400px; height: 400px; background: #f9a8d4; bottom: -100px; right: -100px; }
+
+    .card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 24px;
+      padding: 52px 44px;
+      text-align: center;
+      width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: fadeUp 0.5s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2em; font-weight: 900;
+      color: #667eea;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      font-size: 1.8em;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 0.9em;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    /* Google 버튼 래퍼 — 가운데 정렬 */
+    #google-btn {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      border-top: 1px solid rgba(255,255,255,0.25);
+    }
+    .divider span { font-size: 0.78em; color: rgba(255,255,255,0.6); white-space: nowrap; }
+
+    .features {
+      display: flex; flex-direction: column; gap: 8px;
+      text-align: left;
+    }
+    .feature {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.82em; color: rgba(255,255,255,0.8);
+    }
+    .feature-icon {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95em; flex-shrink: 0;
+    }
+
+    .footer {
+      margin-top: 28px;
+      font-size: 0.72em;
+      color: rgba(255,255,255,0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">김</div>
+    <h1>김비서</h1>
+    <p class="subtitle">스마트한 업무 & 구독 관리의 시작<br>Google 계정으로 바로 시작하세요</p>
+
+    <div id="google-btn"></div>
+
+    <div class="divider"><span>주요 기능</span></div>
+
+    <div class="features">
+      <div class="feature"><div class="feature-icon">🤖</div> AI 아침 브리핑 & 챗봇</div>
+      <div class="feature"><div class="feature-icon">📅</div> Google 캘린더 연동</div>
+      <div class="feature"><div class="feature-icon">📊</div> 매출 · 프로젝트 분석</div>
+      <div class="feature"><div class="feature-icon">📝</div> 회의록 자동 분석</div>
+    </div>
+
+    <div class="footer">© 2026 Choi Hanna · 개인 업무 관리 플랫폼</div>
+  </div>
+
+  <script>
+    initLoginPage('google-btn');
+  </script>
+</body>
+</html>

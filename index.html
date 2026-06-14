@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#667eea">
     <meta name="description" content="구독, 업무, 매출을 한눈에 관리하는 스마트 대시보드">
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="./auth.js"></script>
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23667eea' width='192' height='192' rx='45'/><text x='50%' y='50%' font-size='80' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle'>김</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -206,6 +208,7 @@
     </style>
 </head>
 <body>
+<script>requireAuth();</script>
     <button class="theme-toggle" id="themeToggle" title="테마 전환">🌙</button>
 
     <div class="container">

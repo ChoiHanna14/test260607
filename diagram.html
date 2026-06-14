@@ -2,6 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script src="./auth.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#667eea">
     <link rel="manifest" href="./manifest.json">
@@ -247,6 +249,7 @@
     </style>
 </head>
 <body>
+<script>requireAuth();</script>
     <button class="theme-toggle" id="themeToggle" title="테마 전환">🌙</button>
 
     <div class="container">
