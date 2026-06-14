@@ -1058,6 +1058,28 @@
                 .replace(/\n\n/g, '<br>');
         }
 
+        // 서버 로컬 여부 감지 (localhost에서만 API 버튼 활성화)
+        const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+        // AI API 호출 공통 함수
+        async function callApi(endpoint, btn, loadFn, labels) {
+            btn.disabled = true;
+            btn.textContent = '⏳ AI 생성 중...';
+            try {
+                const res = await fetch(endpoint, { method: 'POST' });
+                if (!res.ok) throw new Error('서버 오류');
+                btn.textContent = '✅ 완료!';
+                await loadFn();
+            } catch (e) {
+                btn.textContent = '❌ 실패 - 다시 시도';
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = labels.default;
+                }, 2500);
+            }
+        }
+
         // 회의록 분석 로드
         async function loadMeeting() {
             const contentEl = document.getElementById('meetingContent');
@@ -1069,42 +1091,32 @@
                 if (!res.ok) throw new Error('파일 없음');
                 const data = await res.json();
 
-                const date = new Date(data.updated_at);
-                const formatted = date.toLocaleString('ko-KR', {
-                    month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
+                const formatted = new Date(data.updated_at).toLocaleString('ko-KR', {
+                    month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
                 updatedEl.textContent = `마지막 분석: ${formatted}`;
 
-                // 분석된 파일 목록
                 const filesHtml = data.files_analyzed
-                    ? `<div style="font-size:0.8em;color:var(--text-secondary);margin-bottom:12px;">
-                         분석 파일: ${data.files_analyzed.join(', ')}
-                       </div>`
+                    ? `<div style="font-size:0.8em;color:var(--text-secondary);margin-bottom:12px;">분석 파일: ${data.files_analyzed.join(', ')}</div>`
                     : '';
-
-                contentEl.innerHTML = filesHtml +
-                    `<div class="meeting-content">${mdToHtml(data.analysis)}</div>`;
+                contentEl.innerHTML = filesHtml + `<div class="meeting-content">${mdToHtml(data.analysis)}</div>`;
 
             } catch (e) {
                 updatedEl.textContent = '';
-                contentEl.innerHTML = `
-                    <div class="meeting-empty">
-                        아직 분석된 회의록이 없습니다.<br>
-                        터미널에서 아래 명령어를 실행해보세요 👇<br><br>
-                        <code>npm run meeting</code>
-                    </div>`;
+                contentEl.innerHTML = isLocal
+                    ? `<div class="meeting-empty">버튼을 눌러 회의록을 분석해보세요! 🚀</div>`
+                    : `<div class="meeting-empty">아직 분석된 회의록이 없습니다.<br>터미널에서 아래 명령어를 실행해보세요 👇<br><br><code>npm run meeting</code></div>`;
             }
 
-            btn.addEventListener('click', () => {
-                btn.disabled = true;
-                btn.textContent = '⏳ 터미널에서 npm run meeting 실행 후 새로고침';
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.textContent = '🔄 다시 분석';
-                }, 4000);
-                loadMeeting();
-            });
+            btn.onclick = null;
+            if (isLocal) {
+                btn.onclick = () => callApi('/api/meeting', btn, loadMeeting, { default: '🔄 다시 분석' });
+            } else {
+                btn.onclick = () => {
+                    btn.textContent = '⏳ npm run meeting 실행 후 새로고침';
+                    setTimeout(() => { btn.textContent = '🔄 다시 분석'; }, 3000);
+                };
+            }
         }
 
         // AI 아침 브리핑 로드
@@ -1118,36 +1130,28 @@
                 if (!res.ok) throw new Error('파일 없음');
                 const data = await res.json();
 
-                // 업데이트 시각 표시
-                const date = new Date(data.updated_at);
-                const formatted = date.toLocaleString('ko-KR', {
-                    month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
+                const formatted = new Date(data.updated_at).toLocaleString('ko-KR', {
+                    month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
                 updatedEl.textContent = `마지막 업데이트: ${formatted}`;
-
                 contentEl.innerHTML = `<div class="briefing-content">${data.summary.replace(/</g, '&lt;').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>`;
 
             } catch (e) {
                 updatedEl.textContent = '';
-                contentEl.innerHTML = `
-                    <div class="briefing-empty">
-                        아직 브리핑이 없습니다.<br>
-                        터미널에서 아래 명령어를 실행해보세요 👇<br><br>
-                        <code>npm run brief</code>
-                    </div>`;
+                contentEl.innerHTML = isLocal
+                    ? `<div class="briefing-empty">버튼을 눌러 오늘의 브리핑을 받아보세요! 🚀</div>`
+                    : `<div class="briefing-empty">아직 브리핑이 없습니다.<br>터미널에서 아래 명령어를 실행해보세요 👇<br><br><code>npm run brief</code></div>`;
             }
 
-            // 버튼: 안내 메시지만 표시 (서버 없이 직접 실행 불가)
-            btn.addEventListener('click', () => {
-                btn.disabled = true;
-                btn.textContent = '⏳ 터미널에서 npm run brief 실행 후 새로고침';
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.textContent = '🔄 다시 브리핑';
-                }, 4000);
-                loadBriefing();
-            });
+            btn.onclick = null;
+            if (isLocal) {
+                btn.onclick = () => callApi('/api/brief', btn, loadBriefing, { default: '🔄 다시 브리핑' });
+            } else {
+                btn.onclick = () => {
+                    btn.textContent = '⏳ npm run brief 실행 후 새로고침';
+                    setTimeout(() => { btn.textContent = '🔄 다시 브리핑'; }, 3000);
+                };
+            }
         }
 
         // 초기화
