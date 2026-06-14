@@ -1,0 +1,21 @@
+{
+  "name": "kim-secretary",
+  "version": "1.0.0",
+  "description": "Smart Subscription & Task Management Platform with AI Briefing",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "brief": "node scripts/brief.mjs"
+  },
+  "keywords": [
+    "task",
+    "management",
+    "dashboard"
+  ],
+  "author": "Choi Hanna",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.8.0",
+    "dotenv": "^16.4.5"
+  }
+}
