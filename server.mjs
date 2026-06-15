@@ -240,6 +240,138 @@ ${dataContext}`;
   }
 });
 
+// ===== 여행 일정 =====
+const TRAVEL_PLAN_PATH = path.join(__dirname, 'travel-plan.json');
+
+function loadTravelPlan() {
+  try {
+    return JSON.parse(fs.readFileSync(TRAVEL_PLAN_PATH, 'utf-8'));
+  } catch (e) {
+    return { title: '여행 일정', subtitle: '', days: [] };
+  }
+}
+
+function saveTravelPlan(plan) {
+  plan.updated_at = new Date().toISOString();
+  fs.writeFileSync(TRAVEL_PLAN_PATH, JSON.stringify(plan, null, 2), 'utf-8');
+}
+
+// 모델 응답에서 JSON 객체만 안전하게 추출
+function extractJson(text) {
+  if (!text) throw new Error('빈 응답');
+  let t = text.trim();
+  // ```json ... ``` 코드펜스 제거
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) t = fence[1].trim();
+  // 첫 { 부터 마지막 } 까지
+  const start = t.indexOf('{');
+  const end = t.lastIndexOf('}');
+  if (start === -1 || end === -1) throw new Error('JSON 형식을 찾을 수 없음');
+  return JSON.parse(t.slice(start, end + 1));
+}
+
+// API: 저장된 여행 일정 조회
+app.get('/api/travel-plan', (req, res) => {
+  res.json(loadTravelPlan());
+});
+
+// API: AI 여행지 조사 → 일정에 추가 (GEMINI_API_KEY는 서버에서만 사용)
+app.post('/api/travel-research', async (req, res) => {
+  const { query, day } = req.body || {};
+  if (!query?.trim()) return res.status(400).json({ error: '여행지/음식점 이름이 없습니다' });
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'API 키가 설정되지 않았습니다' });
+
+  const plan = loadTravelPlan();
+  const dayNum = parseInt(day, 10);
+  const dayObj = plan.days.find(d => d.day === dayNum);
+  if (!dayObj) return res.status(400).json({ error: '해당 일자를 찾을 수 없습니다' });
+
+  try {
+    console.log(`🧳 여행지 조사 요청: "${query}" → Day ${dayNum}`);
+    const ai = new GoogleGenAI({ apiKey });
+
+    const tripCity = plan.title || '여행지';
+    const prompt = `당신은 여행 플래너입니다. "${tripCity}" 일정에 추가할 장소 "${query}"에 대해 최신 정보를 조사해서 아래 JSON 형식으로만 답하세요. 다른 설명·코드펜스 없이 순수 JSON만 출력하세요. 모르는 항목은 빈 문자열로 두세요. 비용은 원화(₩) 기준 근사값으로, 교통은 도심/주요역 기준 이동 방법으로 작성하세요.
+
+{
+  "name": "장소 정식 명칭(한국어)",
+  "category": "관광지 | 맛집 | 쇼핑 | 전망대 | 카페 등 한 단어",
+  "summary": "2~3문장의 간단한 소개와 분위기",
+  "bestVisitTime": "방문하기 좋은 시간대",
+  "openingHours": "영업/운영 시간",
+  "cost": "이용/입장 비용(₩ 근사)",
+  "howToGet": "주요 역/도심에서 가는 방법",
+  "transportCost": "예상 교통비(₩ 근사)",
+  "location": "주소 또는 지역",
+  "imageKeyword": "사진 검색용 영어 키워드",
+  "sources": ["참고한 URL들"]
+}`;
+
+    let result;
+    try {
+      // 구글 검색 그라운딩으로 최신 정보 확보
+      result = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: { tools: [{ googleSearch: {} }] }
+      });
+    } catch (e) {
+      console.warn('⚠️ 검색 그라운딩 실패, 일반 호출로 재시도:', e.message);
+      result = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    }
+
+    const info = extractJson(result.text);
+
+    // 그라운딩 출처 보강
+    try {
+      const chunks = result.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+      const urls = chunks.map(c => c.web?.uri).filter(Boolean);
+      if (urls.length) info.sources = Array.from(new Set([...(info.sources || []), ...urls])).slice(0, 5);
+    } catch (e) {}
+
+    const item = {
+      id: 'ai-' + Date.now().toString(36),
+      name: info.name || query,
+      category: info.category || '여행지',
+      time: '',
+      summary: info.summary || '',
+      bestVisitTime: info.bestVisitTime || '',
+      openingHours: info.openingHours || '',
+      cost: info.cost || '',
+      howToGet: info.howToGet || '',
+      transportCost: info.transportCost || '',
+      location: info.location || '',
+      imageKeyword: info.imageKeyword || info.name || query,
+      sources: info.sources || []
+    };
+
+    dayObj.items = dayObj.items || [];
+    dayObj.items.push(item);
+    saveTravelPlan(plan);
+
+    console.log(`✅ "${item.name}" Day ${dayNum}에 추가 완료`);
+    res.json({ item, plan });
+
+  } catch (err) {
+    console.error('❌ 여행지 조사 오류:', err.message);
+    res.status(500).json({ error: 'AI 조사 실패: ' + err.message });
+  }
+});
+
+// API: 일정 항목 삭제
+app.delete('/api/travel-item', (req, res) => {
+  const dayNum = parseInt(req.query.day, 10);
+  const id = req.query.id;
+  const plan = loadTravelPlan();
+  const dayObj = plan.days.find(d => d.day === dayNum);
+  if (!dayObj) return res.status(404).json({ error: '일자를 찾을 수 없습니다' });
+  dayObj.items = (dayObj.items || []).filter(i => i.id !== id);
+  saveTravelPlan(plan);
+  res.json({ plan });
+});
+
 app.listen(PORT, () => {
   console.log(`\n🚀 김비서 서버 실행 중!`);
   console.log(`   👉 http://localhost:${PORT}/dashboard.html\n`);
