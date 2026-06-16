@@ -1,0 +1,110 @@
+{
+  "title": "후쿠오카 여행",
+  "subtitle": "3박 4일 하카타·텐진·다자이후 코스",
+  "startDate": "2026-07-10",
+  "updated_at": "2026-06-15T00:02:30.298Z",
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-07-10",
+      "label": "도착 & 하카타 야경",
+      "items": [
+        {
+          "id": "d1-canalcity",
+          "name": "캐널시티 하카타",
+          "category": "쇼핑·관광",
+          "time": "15:00",
+          "summary": "운하를 끼고 지어진 대형 복합 쇼핑몰. 매시 정각 분수쇼가 열리고, 라멘 스타디움에서 전국 유명 라멘을 한곳에서 맛볼 수 있습니다.",
+          "bestVisitTime": "오후 3~5시 (분수쇼 + 저녁 식사 연계)",
+          "openingHours": "쇼핑 10:00–21:00 / 식당 11:00–23:00",
+          "cost": "입장 무료 (식사·쇼핑 별도)",
+          "howToGet": "하카타역에서 도보 10분 또는 버스 5분",
+          "transportCost": "도보 무료 / 버스 ₩1,500",
+          "location": "후쿠오카시 하카타구 스미요시",
+          "imageKeyword": "Canal City Hakata Fukuoka",
+          "sources": []
+        },
+        {
+          "id": "d1-yatai",
+          "name": "나카스 포장마차 거리(야타이)",
+          "category": "맛집·야경",
+          "time": "19:30",
+          "summary": "나카강을 따라 늘어선 후쿠오카의 상징, 야타이 포장마차 거리. 하카타 라멘, 야키토리, 명란을 강변 야경과 함께 즐길 수 있습니다.",
+          "bestVisitTime": "저녁 7~10시 (해진 후 분위기 최고)",
+          "openingHours": "대략 18:00–새벽 02:00 (점포별 상이)",
+          "cost": "1인 ₩15,000~30,000",
+          "howToGet": "지하철 공항선 나카스카와바타역 1번 출구 도보 5분",
+          "transportCost": "지하철 ₩2,100",
+          "location": "후쿠오카시 하카타구 나카스",
+          "imageKeyword": "Nakasu yatai food stalls Fukuoka night",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2026-07-11",
+      "label": "다자이후 & 텐진",
+      "items": [
+        {
+          "id": "d2-dazaifu",
+          "name": "다자이후 텐만구",
+          "category": "관광지",
+          "time": "10:00",
+          "summary": "학문의 신 스가와라노 미치자네를 모신 신사로 합격·학업 기원지로 유명합니다. 참배길의 스타벅스(쿠마 켄고 설계)와 우메가에모찌가 명물.",
+          "bestVisitTime": "오전 9~11시 (혼잡 회피)",
+          "openingHours": "06:30–18:30 (계절별 상이)",
+          "cost": "참배 무료 / 보물전 ₩5,000",
+          "howToGet": "텐진역 → 니시테츠 후쿠오카역에서 다자이후선 환승, 다자이후역 하차",
+          "transportCost": "편도 약 ₩4,500",
+          "location": "후쿠오카현 다자이후시",
+          "imageKeyword": "Dazaifu Tenmangu shrine",
+          "sources": []
+        },
+        {
+          "id": "d2-tenjin",
+          "name": "텐진 지하상가 & 쇼핑",
+          "category": "쇼핑",
+          "time": "15:00",
+          "summary": "후쿠오카 최대 번화가 텐진. 유럽풍 디자인의 지하상가와 백화점·드럭스토어가 밀집해 쇼핑과 카페 투어에 제격입니다.",
+          "bestVisitTime": "오후~저녁 (날씨 무관, 지하 연결)",
+          "openingHours": "상점 10:00–20:00 (점포별 상이)",
+          "cost": "무료 (쇼핑 별도)",
+          "howToGet": "다자이후역 → 니시테츠 후쿠오카(텐진)역",
+          "transportCost": "편도 약 ₩4,500",
+          "location": "후쿠오카시 주오구 텐진",
+          "imageKeyword": "Tenjin Fukuoka shopping street",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2026-07-12",
+      "label": "바다 & 타워",
+      "items": [
+        {
+          "id": "d3-tower",
+          "name": "후쿠오카 타워",
+          "category": "전망대",
+          "time": "16:30",
+          "summary": "높이 234m의 해변 전망 타워. 360도 유리 전망대에서 하카타만과 시가지를 한눈에 볼 수 있고 일몰·야경 명소로 인기입니다.",
+          "bestVisitTime": "오후 4~7시 (일몰·야경)",
+          "openingHours": "09:30–22:00 (최종 입장 21:30)",
+          "cost": "성인 ₩8,000",
+          "howToGet": "텐진에서 버스 W1/302번 → 후쿠오카타워 정류장 하차",
+          "transportCost": "버스 ₩2,300",
+          "location": "후쿠오카시 사와라구 모모치하마",
+          "imageKeyword": "Fukuoka Tower seaside sunset",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "day": 4,
+      "date": "2026-07-13",
+      "label": "귀국",
+      "items": []
+    }
+  ]
+}
